@@ -1,0 +1,10 @@
+package gin_helper
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+)
+
+func BindJson(c *gin.Context, obj interface{}) {
+	c.ShouldBindBodyWith(obj, binding.JSON)
+}
