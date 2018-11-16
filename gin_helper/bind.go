@@ -5,6 +5,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-func BindJson(c *gin.Context, obj interface{}) {
-	c.ShouldBindBodyWith(obj, binding.JSON)
+func BindJson(c *gin.Context, obj interface{}) error {
+	return c.ShouldBindBodyWith(obj, binding.JSON)
 }
