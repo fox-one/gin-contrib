@@ -11,7 +11,13 @@ import (
 var badRequest = errors.New(1, "invalid operation", http.StatusBadRequest)
 
 // OK() 将 args 构造成 map 然后转成 json
+// 如果 args length 为 1，直接解析成 json
 func OK(c *gin.Context, args ...interface{}) {
+	if len(args) == 1 {
+		c.JSON(http.StatusOK, args[0])
+		return
+	}
+
 	resp := make(gin.H, len(args)/2)
 	for idx := 0; idx+1 < len(args); idx += 2 {
 		k, v := args[idx].(string), args[idx+1]
