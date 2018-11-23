@@ -8,7 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var badRequest = errors.New(1, "invalid operation", http.StatusBadRequest)
+var (
+	badRequest = errors.New(1, "invalid operation", http.StatusBadRequest)
+	serverErr  = errors.New(2, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+)
 
 // OK() 将 args 构造成 map 然后转成 json
 // 如果 args length 为 1，直接解析成 json
@@ -42,6 +45,22 @@ func Fail(c *gin.Context, status, code int, msg string, hints ...interface{}) {
 
 func FailError(c *gin.Context, err error, hints ...interface{}) {
 	status, code, msg := 400, 1, "invalid operation"
+
+	if e, ok := err.(errors.Error); ok {
+		code, msg = e.Code(), e.Message()
+
+		if re, ok := err.(errors.RequestError); ok {
+			status = re.StatusCode()
+		}
+	} else if err != nil {
+		msg = msg + ": " + err.Error()
+	}
+
+	Fail(c, status, code, msg, hints...)
+}
+
+func FailServer(c *gin.Context, err error, hints ...interface{}) {
+	status, code, msg := 500, 2, http.StatusText(http.StatusInternalServerError)
 
 	if e, ok := err.(errors.Error); ok {
 		code, msg = e.Code(), e.Message()
