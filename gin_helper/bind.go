@@ -10,5 +10,5 @@ func BindJson(c *gin.Context, obj interface{}) error {
 }
 
 func BindQuery(c *gin.Context, obj interface{}) error {
-	return c.ShouldBindQuery(&obj)
+	return c.ShouldBindQuery(obj)
 }
