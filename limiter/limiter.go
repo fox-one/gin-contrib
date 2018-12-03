@@ -20,9 +20,10 @@ type Limiter struct {
 	mux  sync.Mutex
 }
 
-func NewLimiter(addr string, db int) (*Limiter, error) {
+func NewLimiter(addr string, password string, db int) (*Limiter, error) {
 	options := &redis.Options{
 		Addr:         addr,
+		Password:     password,
 		DB:           db,
 		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 3 * time.Second,
