@@ -74,3 +74,19 @@ func FailServer(c *gin.Context, err error, hints ...interface{}) {
 
 	Fail(c, status, code, msg, hints...)
 }
+
+// pagination
+func OkWithPagination(c *gin.Context, cursor string, args ...interface{}) {
+	resp := make(gin.H, len(args)/2+1)
+	for idx := 0; idx+1 < len(args); idx += 2 {
+		k, v := args[idx].(string), args[idx+1]
+		resp[k] = v
+	}
+
+	resp["pagination"] = map[string]interface{}{
+		"next_cursor": cursor,
+		"has_next":    len(cursor) > 0,
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
