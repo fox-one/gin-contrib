@@ -33,12 +33,16 @@ func NewLimiter(addr string, password string, db int) (*Limiter, error) {
 	}
 
 	redisPool := redis.NewClient(options)
-	if err := redisPool.Ping().Err(); err != nil {
+	return NewLimiterWithClient(redisPool)
+}
+
+func NewLimiterWithClient(c *redis.Client) (*Limiter, error) {
+	if err := c.Ping().Err(); err != nil {
 		return nil, err
 	}
 
 	return &Limiter{
-		pool: redisPool,
+		pool: c,
 		opts: make(map[string]*opt, 0),
 	}, nil
 }
