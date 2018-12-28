@@ -6,7 +6,7 @@ import (
 	goi18n "github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-func Translate(c *gin.Context, id string, paras ...interface{}) string {
+func Localize(c *gin.Context, id string, paras ...interface{}) string {
 	l := i18n.ExtractLocalizer(c)
 	data := make(map[string]interface{})
 	for idx := 0; idx < len(paras)-1; idx += 1 {
