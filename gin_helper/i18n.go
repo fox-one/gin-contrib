@@ -9,7 +9,7 @@ import (
 func Localize(c *gin.Context, id string, paras ...interface{}) string {
 	l := i18n.ExtractLocalizer(c)
 	data := make(map[string]interface{})
-	for idx := 0; idx < len(paras)-1; idx += 1 {
+	for idx := 0; idx < len(paras)-1; idx += 2 {
 		k, v := paras[idx].(string), paras[idx+1]
 		data[k] = v
 	}
