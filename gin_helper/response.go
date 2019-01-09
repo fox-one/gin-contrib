@@ -2,6 +2,7 @@ package gin_helper
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/fox-one/gin-contrib/errors"
@@ -41,7 +42,16 @@ func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints 
 	}
 
 	if len(hints) > 0 && IsDebug() {
-		resp["hint"] = fmt.Sprintf(hints[0].(string), hints[1:]...)
+		switch v := hints[0].(type) {
+		case string:
+			resp["hint"] = fmt.Sprintf(v, hints[1:]...)
+		case error:
+			resp["hint"] = v.Error()
+		case fmt.Stringer:
+			resp["hint"] = v.String()
+		default:
+			log.Panicln("unsupported hint", v)
+		}
 	}
 
 	c.AbortWithStatusJSON(status, resp)
