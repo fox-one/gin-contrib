@@ -104,3 +104,13 @@ func OkWithPagination(c *gin.Context, cursor string, args ...interface{}) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+type JSONString string
+
+func (s JSONString) MarshalJSON() ([]byte, error) {
+	return []byte(s), nil
+}
+
+func OKWithString(c *gin.Context, text string) {
+	OK(c, JSONString(text))
+}
