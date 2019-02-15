@@ -11,7 +11,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-func NewBundle(defaultLang language.Tag, rootPath string) *i18n.Bundle {
+func NewI18nBundle(defaultLang language.Tag, rootPath string) *i18n.Bundle {
 	b := &i18n.Bundle{DefaultLanguage: defaultLang}
 	b.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
