@@ -5,5 +5,5 @@ import (
 )
 
 func IsDebug() bool {
-	return gin.Mode() == gin.DebugMode
+	return gin.IsDebugging()
 }
