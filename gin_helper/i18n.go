@@ -32,17 +32,28 @@ func NewI18nBundle(defaultLang language.Tag, rootPath string) *i18n.Bundle {
 
 func MustLocalize(b *i18n.Bundle, lang, id string, paras ...interface{}) string {
 	l := i18n.NewLocalizer(b, lang)
-	return localize(l, id, paras...)
+	r, err := localize(l, id, paras...)
+	if err != nil {
+		panic(err)
+	}
+
+	return r
 }
 
-func localize(l *i18n.Localizer, id string, paras ...interface{}) string {
+func Localize(b *i18n.Bundle, lang, id string, paras ...interface{}) string {
+	l := i18n.NewLocalizer(b, lang)
+	r, _ := localize(l, id, paras...)
+	return r
+}
+
+func localize(l *i18n.Localizer, id string, paras ...interface{}) (string, error) {
 	data := make(map[string]interface{})
 	for idx := 0; idx < len(paras)-1; idx += 2 {
 		k, v := paras[idx].(string), paras[idx+1]
 		data[k] = v
 	}
 
-	return l.MustLocalize(&i18n.LocalizeConfig{
+	return l.Localize(&i18n.LocalizeConfig{
 		MessageID:    id,
 		TemplateData: data,
 	})
@@ -79,5 +90,6 @@ func ExtractLocalizer(c *gin.Context) *i18n.Localizer {
 
 func LocalizeCtx(c *gin.Context, id string, paras ...interface{}) string {
 	l := ExtractLocalizer(c)
-	return localize(l, id, paras...)
+	r, _ := localize(l, id, paras...)
+	return r
 }
