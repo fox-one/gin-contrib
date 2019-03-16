@@ -52,11 +52,13 @@ func (b *sortedSetBlocker) State(id string) (exp time.Time, cause string, blocke
 	key := b.key(id)
 	if val := b.client.ZRangeWithScores(key, -1, -1).Val(); len(val) >= 1 {
 		z := val[0]
-		exp = time.Unix(int64(z.Score), 0)
-		blocked = exp.After(time.Now())
-		if member, ok := z.Member.(string); ok {
-			if segments := strings.SplitN(member, ":", 2); len(segments) == 2 {
-				cause = segments[1]
+		e := time.Unix(int64(z.Score), 0)
+		if blocked = e.After(time.Now()); blocked {
+			exp = e
+			if member, ok := z.Member.(string); ok {
+				if segments := strings.SplitN(member, ":", 2); len(segments) == 2 {
+					cause = segments[1]
+				}
 			}
 		}
 	}
