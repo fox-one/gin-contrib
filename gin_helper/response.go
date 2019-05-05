@@ -31,6 +31,28 @@ func OK(c *gin.Context, args ...interface{}) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func Data(c *gin.Context, args ...interface{}) {
+	var data interface{}
+
+	switch len(args) {
+	case 1:
+		data = args[0]
+	default:
+		m := make(gin.H, len(args)/2)
+		for idx := 0; idx+1 < len(args); idx += 2 {
+			k, v := args[idx].(string), args[idx+1]
+			m[k] = v
+		}
+
+		data = m
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": data,
+	})
+}
+
 func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints ...interface{}) {
 	resp := gin.H{
 		"code": code,
