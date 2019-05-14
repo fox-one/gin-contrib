@@ -12,7 +12,7 @@ import (
 )
 
 func NewI18nBundle(defaultLang language.Tag, rootPath string) *i18n.Bundle {
-	b := &i18n.Bundle{DefaultLanguage: defaultLang}
+	b := i18n.NewBundle(defaultLang)
 	b.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
 	if rootInfo, err := os.Stat(rootPath); err == nil && rootInfo.IsDir() {
