@@ -1,18 +1,43 @@
 package gin_helper
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/fox-one/gin-contrib/errors"
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var (
 	badRequest = errors.New(1, "invalid operation", http.StatusBadRequest)
 	serverErr  = errors.New(2, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 )
+
+const responseJsonKeyTransformerContextKey = "_gin_response_json_key_transformer"
+
+func TransformResponseJsonKey(fn JsonKeyTransformer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set(responseJsonKeyTransformerContextKey, fn)
+	}
+}
+
+func response(c *gin.Context, code int, obj interface{}) {
+	data, err := jsoniter.Marshal(obj)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if v, ok := c.Get(responseJsonKeyTransformerContextKey); ok {
+		if fn, ok := v.(JsonKeyTransformer); ok {
+			data = TransformJsonKeys(data, fn)
+		}
+	}
+
+	c.AbortWithStatusJSON(code, json.RawMessage(data))
+}
 
 // OK() 将 args 构造成 map 然后转成 json
 // 如果 args length 为 1，直接解析成 json
@@ -28,7 +53,7 @@ func OK(c *gin.Context, args ...interface{}) {
 		resp[k] = v
 	}
 
-	c.JSON(http.StatusOK, resp)
+	response(c, http.StatusOK, resp)
 }
 
 func Data(c *gin.Context, args ...interface{}) {
@@ -47,10 +72,7 @@ func Data(c *gin.Context, args ...interface{}) {
 		data = m
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"data": data,
-	})
+	response(c, http.StatusOK, gin.H{"code": 0, "data": data})
 }
 
 func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints ...interface{}) {
@@ -76,7 +98,7 @@ func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints 
 		}
 	}
 
-	c.AbortWithStatusJSON(status, resp)
+	response(c, status, resp)
 }
 
 func unpackErrWithDefault(err error, status, code int, msg string) (int, int, string) {
@@ -124,7 +146,7 @@ func OkWithPagination(c *gin.Context, cursor string, args ...interface{}) {
 		"has_next":    len(cursor) > 0,
 	}
 
-	c.JSON(http.StatusOK, resp)
+	response(c, http.StatusOK, resp)
 }
 
 type JSONString string
