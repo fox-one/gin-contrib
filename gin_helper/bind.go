@@ -2,6 +2,8 @@ package gin_helper
 
 import (
 	"io/ioutil"
+	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -48,7 +50,7 @@ func BindJson(c *gin.Context, obj interface{}) error {
 	}
 
 	if v, ok := c.Get(requestJsonKeyTransformerContextKey); ok {
-		if fn, _ := v.(JsonKeyTransformer); fn != nil {
+		if fn, ok := v.(JsonKeyTransformer); ok && fn != nil {
 			body = TransformJsonKeys(body, fn)
 			c.Set(requestTransformedBodyContextKey, body)
 		}
@@ -58,7 +60,23 @@ func BindJson(c *gin.Context, obj interface{}) error {
 }
 
 func BindQuery(c *gin.Context, obj interface{}) error {
-	return c.ShouldBindQuery(obj)
+	url, _ := url.Parse(c.Request.URL.String())
+
+	if v, ok := c.Get(requestJsonKeyTransformerContextKey); ok {
+		if fn, ok := v.(JsonKeyTransformer); ok && fn != nil {
+			query := url.Query()
+			for k, v := range query {
+				if key := fn(k); key != "" && key != k {
+					query[key] = v
+				}
+			}
+
+			url.RawQuery = query.Encode()
+		}
+	}
+
+	req := &http.Request{URL: url}
+	return binding.Query.Bind(req, obj)
 }
 
 func BindUri(c *gin.Context, obj interface{}) error {

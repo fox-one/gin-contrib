@@ -31,7 +31,7 @@ func response(c *gin.Context, code int, obj interface{}) {
 	}
 
 	if v, ok := c.Get(responseJsonKeyTransformerContextKey); ok {
-		if fn, _ := v.(JsonKeyTransformer); fn != nil {
+		if fn, ok := v.(JsonKeyTransformer); ok && fn != nil {
 			data = TransformJsonKeys(data, fn)
 		}
 	}
