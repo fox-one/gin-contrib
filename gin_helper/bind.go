@@ -66,7 +66,7 @@ func BindQuery(c *gin.Context, obj interface{}) error {
 		if fn, ok := v.(JsonKeyTransformer); ok && fn != nil {
 			query := url.Query()
 			for k, v := range query {
-				if key := fn(k); key != "" && key != k {
+				if key := fn(k); key != "" && key != k && query.Get(key) == "" {
 					query[key] = v
 				}
 			}
