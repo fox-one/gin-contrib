@@ -16,7 +16,7 @@ var (
 	serverErr  = errors.New(2, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 )
 
-const responseJsonKeyTransformerContextKey = "_gin_response_json_key_transformer"
+const responseJsonKeyTransformerContextKey = "_gin_helper_response_json_key_transformer"
 
 func TransformResponseJsonKey(fn JsonKeyTransformer) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -31,7 +31,7 @@ func response(c *gin.Context, code int, obj interface{}) {
 	}
 
 	if v, ok := c.Get(responseJsonKeyTransformerContextKey); ok {
-		if fn, ok := v.(JsonKeyTransformer); ok {
+		if fn, _ := v.(JsonKeyTransformer); fn != nil {
 			data = TransformJsonKeys(data, fn)
 		}
 	}

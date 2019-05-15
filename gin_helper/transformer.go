@@ -20,6 +20,7 @@ func lookupJsonKey(data []byte) (int, string) {
 			if left > 0 && right > 0 {
 				return left + 1, string(data[left+1 : right])
 			}
+		case ' ':
 		default:
 			if right > 0 {
 				left = 0
