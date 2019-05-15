@@ -1,7 +1,6 @@
 package gin_helper
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +50,6 @@ func BindJson(c *gin.Context, obj interface{}) error {
 	if v, ok := c.Get(requestJsonKeyTransformerContextKey); ok {
 		if fn, _ := v.(JsonKeyTransformer); fn != nil {
 			body = TransformJsonKeys(body, fn)
-			fmt.Println(string(body))
 			c.Set(requestTransformedBodyContextKey, body)
 		}
 	}
