@@ -25,7 +25,7 @@ func TransformResponseJsonKey(fn JsonKeyTransformer) gin.HandlerFunc {
 }
 
 func response(c *gin.Context, code int, obj interface{}) {
-	data, err := jsoniter.Marshal(obj)
+	data, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(obj)
 	if err != nil {
 		log.Panic(err)
 	}
