@@ -24,7 +24,7 @@ func TransformResponseJsonKey(fn JsonKeyTransformer) gin.HandlerFunc {
 	}
 }
 
-func response(c *gin.Context, code int, obj interface{}) {
+func Response(c *gin.Context, code int, obj interface{}) {
 	data, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(obj)
 	if err != nil {
 		log.Panic(err)
@@ -53,7 +53,7 @@ func OK(c *gin.Context, args ...interface{}) {
 		resp[k] = v
 	}
 
-	response(c, http.StatusOK, resp)
+	Response(c, http.StatusOK, resp)
 }
 
 func Data(c *gin.Context, args ...interface{}) {
@@ -72,7 +72,7 @@ func Data(c *gin.Context, args ...interface{}) {
 		data = m
 	}
 
-	response(c, http.StatusOK, gin.H{"code": 0, "data": data})
+	Response(c, http.StatusOK, gin.H{"code": 0, "data": data})
 }
 
 func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints ...interface{}) {
@@ -98,7 +98,7 @@ func Fail(c *gin.Context, status, code int, msg string, data interface{}, hints 
 		}
 	}
 
-	response(c, status, resp)
+	Response(c, status, resp)
 }
 
 func unpackErrWithDefault(err error, status, code int, msg string) (int, int, string) {
@@ -146,7 +146,7 @@ func OkWithPagination(c *gin.Context, cursor string, args ...interface{}) {
 		"has_next":    len(cursor) > 0,
 	}
 
-	response(c, http.StatusOK, resp)
+	Response(c, http.StatusOK, resp)
 }
 
 type JSONString string
