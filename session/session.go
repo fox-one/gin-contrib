@@ -174,3 +174,7 @@ func IsErrNotFound(err error) bool {
 		return gorm.IsRecordNotFoundError(err)
 	}
 }
+
+func (s *Session) IsErrNotFound(err error) bool {
+	return IsErrNotFound(err)
+}
