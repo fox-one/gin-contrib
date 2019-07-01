@@ -5,9 +5,8 @@ import (
 	"strings"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-
 	"github.com/go-redis/redis"
+	uuid "github.com/gofrs/uuid"
 )
 
 type Blocker interface {
