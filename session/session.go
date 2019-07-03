@@ -114,6 +114,12 @@ func (s *Session) MysqlWrite() *gorm.DB {
 	return s.mysqlWrite
 }
 
+func (s *Session) MysqlReadOnWrite() *Session {
+	s = s.Copy()
+	s.mysqlRead = s.mysqlWrite
+	return s
+}
+
 func (s *Session) MysqlBegin() *Session {
 	cp := s.Copy()
 	cp.mysqlWrite = s.MysqlWrite().Begin()
