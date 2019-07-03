@@ -79,11 +79,11 @@ func (limiter *Limiter) Available(key, group string, weight int) (int, error) {
 	_, err := limiter.pool.Pipelined(func(pipe redis.Pipeliner) error {
 		pipe.ZRemRangeByScore(key, "-inf", fmt.Sprint(now.Add(-window).UnixNano()/1000000))
 		if weight > 0 {
-			members := make([]redis.Z, 0, weight)
+			members := make([]*redis.Z, 0, weight)
 			score := float64(now.UnixNano() / 1000000)
 			for idx := 0; idx < weight; idx += 1 {
 				mem, _ := uuid.NewV4()
-				members = append(members, redis.Z{Score: score, Member: mem.String()})
+				members = append(members, &redis.Z{Score: score, Member: mem.String()})
 			}
 			pipe.ZAdd(key, members...)
 		}
