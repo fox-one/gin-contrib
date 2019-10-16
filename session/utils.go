@@ -75,6 +75,9 @@ func openRedis(v *viper.Viper) *redis.Client {
 
 func awsSession(v *viper.Viper) *session.Session {
 	v = v.Sub("aws")
+	if v == nil {
+		return nil
+	}
 
 	var (
 		key    = v.GetString("key")

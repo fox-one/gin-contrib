@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-redis/redis"
@@ -130,11 +131,11 @@ func (s *Session) MysqlRollback() *gorm.DB {
 	return s.mysqlWrite.Rollback()
 }
 
-type sqlTx interface {
-	Rollback() error
-}
-
 func (s *Session) MysqlRollbackUnlessCommitted() *gorm.DB {
+	type sqlTx interface {
+		Rollback() error
+	}
+
 	var emptySQLTx *sql.Tx
 	if db, ok := s.mysqlWrite.CommonDB().(sqlTx); ok && db != nil && db != emptySQLTx {
 		err := db.Rollback()
@@ -152,6 +153,25 @@ func (s *Session) MysqlRollbackUnlessCommitted() *gorm.DB {
 
 func (s *Session) MysqlCommit() *gorm.DB {
 	return s.mysqlWrite.Commit()
+}
+
+// context.Context
+
+// Deadline deadline
+func (s *Session) Deadline() (deadline time.Time, ok bool) {
+	return s.Context().Deadline()
+}
+
+func (s *Session) Done() <-chan struct{} {
+	return s.Context().Done()
+}
+
+func (s *Session) Err() error {
+	return s.Context().Err()
+}
+
+func (s *Session) Value(key interface{}) interface{} {
+	return s.Context().Value(key)
 }
 
 func (s *Session) Context() context.Context {
