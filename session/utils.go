@@ -33,6 +33,9 @@ func dialMysql(host, user, pwd, database string) *gorm.DB {
 
 func openMysql(v *viper.Viper) (r, w *gorm.DB) {
 	v = v.Sub("mysql")
+	if v == nil {
+		return nil, nil
+	}
 
 	var (
 		username = v.GetString("username")
@@ -54,6 +57,9 @@ func openMysql(v *viper.Viper) (r, w *gorm.DB) {
 
 func openRedis(v *viper.Viper) *redis.Client {
 	v = v.Sub("redis")
+	if v == nil {
+		return nil
+	}
 
 	var (
 		addr = v.GetString("addr")
