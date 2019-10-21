@@ -65,6 +65,7 @@ func NewWithViper(v *viper.Viper) *Session {
 // Copy copy
 func (s *Session) Copy() *Session {
 	return &Session{
+		memory:     s.memory,
 		redis:      s.redis,
 		mysqlRead:  s.mysqlRead,
 		mysqlWrite: s.mysqlWrite,
