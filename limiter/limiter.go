@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -37,7 +38,7 @@ func NewLimiter(addr string, password string, db int) (*Limiter, error) {
 }
 
 func NewLimiterWithClient(c *redis.Client) (*Limiter, error) {
-	if err := c.Ping().Err(); err != nil {
+	if err := c.Ping(context.Background()).Err(); err != nil {
 		return nil, err
 	}
 
@@ -76,8 +77,8 @@ func (limiter *Limiter) Available(key, group string, weight int) (int, error) {
 	now := time.Now()
 	key = limiterKey(group, key)
 	var zcount *redis.IntCmd
-	_, err := limiter.pool.Pipelined(func(pipe redis.Pipeliner) error {
-		pipe.ZRemRangeByScore(key, "-inf", fmt.Sprint(now.Add(-window).UnixNano()/1000000))
+	_, err := limiter.pool.Pipelined(context.Background(), func(pipe redis.Pipeliner) error {
+		pipe.ZRemRangeByScore(context.Background(), key, "-inf", fmt.Sprint(now.Add(-window).UnixNano()/1000000))
 		if weight > 0 {
 			members := make([]*redis.Z, 0, weight)
 			score := float64(now.UnixNano() / 1000000)
@@ -85,10 +86,10 @@ func (limiter *Limiter) Available(key, group string, weight int) (int, error) {
 				mem, _ := uuid.NewV4()
 				members = append(members, &redis.Z{Score: score, Member: mem.String()})
 			}
-			pipe.ZAdd(key, members...)
+			pipe.ZAdd(context.Background(), key, members...)
 		}
-		pipe.Expire(key, time.Second*time.Duration(int64(window.Seconds())+60))
-		zcount = pipe.ZCount(key, "-inf", "+inf")
+		pipe.Expire(context.Background(), key, time.Second*time.Duration(int64(window.Seconds())+60))
+		zcount = pipe.ZCount(context.Background(), key, "-inf", "+inf")
 		return nil
 	})
 	if err != nil {
@@ -100,7 +101,7 @@ func (limiter *Limiter) Available(key, group string, weight int) (int, error) {
 
 func (limiter *Limiter) Clear(key, group string) error {
 	key = limiterKey(group, key)
-	zcount := limiter.pool.Del(key)
+	zcount := limiter.pool.Del(context.Background(), key)
 	_, err := zcount.Result()
 	return err
 }

@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"time"
@@ -35,13 +36,13 @@ func (b *sortedSetBlocker) BlockUntil(id, cause string, exp time.Time) error {
 	}
 
 	key := b.key(id)
-	_, err := b.client.Pipelined(func(p redis.Pipeliner) error {
-		p.ZRemRangeByScore(key, "-inf", strconv.FormatInt(score, 10))
-		p.ZAdd(key, &redis.Z{
+	_, err := b.client.Pipelined(context.Background(), func(p redis.Pipeliner) error {
+		p.ZRemRangeByScore(context.Background(), key, "-inf", strconv.FormatInt(score, 10))
+		p.ZAdd(context.Background(), key, &redis.Z{
 			Member: uuid.Must(uuid.NewV4()).String() + ":" + cause,
 			Score:  float64(score),
 		})
-		p.Expire(key, b.maxAge)
+		p.Expire(context.Background(), key, b.maxAge)
 		return nil
 	})
 	return err
@@ -49,7 +50,7 @@ func (b *sortedSetBlocker) BlockUntil(id, cause string, exp time.Time) error {
 
 func (b *sortedSetBlocker) State(id string) (exp time.Time, cause string, blocked bool) {
 	key := b.key(id)
-	if val := b.client.ZRangeWithScores(key, -1, -1).Val(); len(val) >= 1 {
+	if val := b.client.ZRangeWithScores(context.Background(), key, -1, -1).Val(); len(val) >= 1 {
 		z := val[0]
 		e := time.Unix(int64(z.Score), 0)
 		if blocked = e.After(time.Now()); blocked {
@@ -66,5 +67,5 @@ func (b *sortedSetBlocker) State(id string) (exp time.Time, cause string, blocke
 }
 
 func (b *sortedSetBlocker) Clean(id string) error {
-	return b.client.Del(b.key(id)).Err()
+	return b.client.Del(context.Background(), b.key(id)).Err()
 }
