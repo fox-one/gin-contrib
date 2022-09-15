@@ -38,7 +38,7 @@ func (b *sortedSetBlocker) BlockUntil(id, cause string, exp time.Time) error {
 	key := b.key(id)
 	_, err := b.client.Pipelined(context.Background(), func(p redis.Pipeliner) error {
 		p.ZRemRangeByScore(context.Background(), key, "-inf", strconv.FormatInt(score, 10))
-		p.ZAdd(context.Background(), key, &redis.Z{
+		p.ZAdd(context.Background(), key, redis.Z{
 			Member: uuid.Must(uuid.NewV4()).String() + ":" + cause,
 			Score:  float64(score),
 		})

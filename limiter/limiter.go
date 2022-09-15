@@ -29,7 +29,6 @@ func NewLimiter(addr string, password string, db int) (*Limiter, error) {
 		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 3 * time.Second,
 		PoolTimeout:  4 * time.Second,
-		IdleTimeout:  60 * time.Second,
 		PoolSize:     512,
 	}
 
@@ -80,11 +79,11 @@ func (limiter *Limiter) Available(key, group string, weight int) (int, error) {
 	_, err := limiter.pool.Pipelined(context.Background(), func(pipe redis.Pipeliner) error {
 		pipe.ZRemRangeByScore(context.Background(), key, "-inf", fmt.Sprint(now.Add(-window).UnixNano()/1000000))
 		if weight > 0 {
-			members := make([]*redis.Z, 0, weight)
+			members := make([]redis.Z, 0, weight)
 			score := float64(now.UnixNano() / 1000000)
 			for idx := 0; idx < weight; idx += 1 {
 				mem, _ := uuid.NewV4()
-				members = append(members, &redis.Z{Score: score, Member: mem.String()})
+				members = append(members, redis.Z{Score: score, Member: mem.String()})
 			}
 			pipe.ZAdd(context.Background(), key, members...)
 		}
