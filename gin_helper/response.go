@@ -8,7 +8,6 @@ import (
 
 	"github.com/fox-one/gin-contrib/errors"
 	"github.com/gin-gonic/gin"
-	jsoniter "github.com/json-iterator/go"
 )
 
 var (
@@ -25,7 +24,7 @@ func TransformResponseJsonKey(fn JsonKeyTransformer) gin.HandlerFunc {
 }
 
 func Response(c *gin.Context, code int, obj interface{}) {
-	data, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(obj)
+	data, err := json.Marshal(obj)
 	if err != nil {
 		log.Panic(err)
 	}
